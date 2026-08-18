@@ -625,6 +625,14 @@ a:hover { color: var(--encre); }
 .graphe .marche-zone:hover { fill: var(--encre); fill-opacity: .035; }
 .graphe .marche-ici, .graphe .rang-ici { fill: var(--accent); fill-opacity: .10; }
 
+/* Les rubans : deux populations d'une statistique, et le seuil posé entre elles. */
+.graphe .ruban { fill: var(--encre-pale); fill-opacity: .28; }
+.graphe .ruban.t-attention { fill: var(--attention); fill-opacity: .3; }
+.graphe .ruban.t-accent { fill: var(--accent); fill-opacity: .32; }
+.graphe .ruban-nom { font: 600 12px/1 var(--police); fill: var(--encre-pale); }
+.graphe .ruban-nom.t-attention { fill: var(--attention); }
+.graphe .ruban-nom.t-accent { fill: var(--accent); }
+
 /* La séquence : une barre par chantier, son échéance en trait, le dépassement hachuré. */
 .graphe .seq-barre { fill: var(--accent); fill-opacity: .55; }
 .graphe .seq-barre.tard { fill: var(--defavorable); fill-opacity: .5; }

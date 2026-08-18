@@ -1374,6 +1374,78 @@ export function sequence({ lignes, fmtX = String, motEcheance, motHaut, choix = 
 }
 
 /**
+ * LES RUBANS — deux populations d'une statistique, et le seuil qu'on pose entre elles.
+ *
+ * Une figure pour la question « ce seuil sépare-t-il quelque chose ? ». En abscisse, ce
+ * qu'on peut choisir (une taille de fenêtre) ; en ordonnée, la statistique. Deux rubans :
+ * ce que la statistique vaut quand rien ne bouge, et ce qu'elle vaut quand quelque chose
+ * bouge. Le seuil est un trait horizontal que le lecteur monte et descend.
+ *
+ * Là où les rubans se recouvrent, aucun seuil ne sépare — et c'est le seul endroit où la
+ * réponse honnête est « ce contrôle ne peut pas marcher ici ». Un tableau de valeurs ne le
+ * dit jamais ; deux rubans qui se chevauchent le disent sans une phrase.
+ *
+ * @param {{x: {valeurs:number[], nom:string, fmt?:(v:number)=>string, log?:boolean},
+ *          rubans: Array<{nom:string, bas:number[], haut:number[], ton?:string}>,
+ *          seuil: {v:number, etiquette?:string, saisissable?:boolean},
+ *          y: {nom:string, fmt?:(v:number)=>string, max?:number}, aria:string}} o
+ */
+export function rubans({ x, rubans: liste, seuil, y, aria }) {
+  if (!x?.valeurs?.length || !liste?.length) return "";
+  const G = 74, D = 128, T = 26, B = 46;
+  const H = 300;
+  const sol = H - B;
+  const fmtX = x.fmt ?? String, fmtY = y.fmt ?? String;
+
+  const tx = (v) => (x.log ? Math.log(Math.max(v, 1e-9)) : v);
+  const x0 = tx(Math.min(...x.valeurs)), x1 = tx(Math.max(...x.valeurs));
+  const px = (v) => arr(G + ((tx(v) - x0) / ((x1 - x0) || 1)) * (L - G - D));
+
+  const toutes = liste.flatMap((r) => [...r.bas, ...r.haut]).filter(fini);
+  const yMax = y.max ?? Math.max(seuil.v * 1.25, ...toutes) * 1.05;
+  const py = (v) => arr(sol - (Math.min(Math.max(v, 0), yMax) / (yMax || 1)) * (sol - T));
+
+  let svg = "";
+  for (const c of crans({ bas: 0, haut: yMax }, 4)) {
+    const yy = py(c);
+    svg += `<line class="grille" x1="${G}" y1="${yy}" x2="${L - D}" y2="${yy}" />`
+      + `<text class="grad" x="${G - 8}" y="${arr(yy + 4)}" text-anchor="end">${ech(fmtY(c))}</text>`;
+  }
+
+  liste.forEach((r, i) => {
+    const haut = x.valeurs.map((v, j) => `${px(v)},${py(r.haut[j])}`).join(" ");
+    const bas = x.valeurs.map((v, j) => `${px(v)},${py(r.bas[j])}`).reverse().join(" ");
+    svg += `<polygon class="ruban ${r.ton ? "t-" + r.ton : ""}" points="${haut} ${bas}" />`;
+    /* L'intitulé se pose au bout du ruban, jamais dans une légende à part : c'est là que
+     * l'oeil est quand il suit la bande. */
+    const dernier = x.valeurs.length - 1;
+    const milieu = (py(r.haut[dernier]) + py(r.bas[dernier])) / 2;
+    svg += `<text class="ruban-nom ${r.ton ? "t-" + r.ton : ""}" x="${L - D + 8}" y="${arr(milieu + 4)}">${ech(r.nom)}</text>`;
+  });
+
+  svg += `<line class="sol" x1="${G}" y1="${sol}" x2="${L - D}" y2="${sol}" />`;
+  for (const v of [x.valeurs[0], x.valeurs[x.valeurs.length - 1]]) {
+    svg += `<text class="grad" x="${px(v)}" y="${sol + 18}" text-anchor="${v === x.valeurs[0] ? "start" : "end"}">${ech(fmtX(v))}</text>`;
+  }
+  svg += `<text class="axe-titre" x="${arr((G + L - D) / 2)}" y="${H - 8}" text-anchor="middle">${ech(x.nom)}</text>`
+    + `<text class="axe-titre" x="${G - 46}" y="${T - 8}" text-anchor="start">${ech(y.nom)}</text>`;
+
+  const ys = py(seuil.v);
+  svg += `<line class="repere-seuil" x1="${G}" y1="${ys}" x2="${L - D}" y2="${ys}" />`;
+  if (seuil.etiquette) {
+    svg += `<text class="etiq-seuil" x="${L - D - 6}" y="${arr(ys - 6)}" text-anchor="end">${ech(seuil.etiquette)}</text>`;
+  }
+
+  /* La prise couvre le cadre : le trait se prend n'importe où, et il ne bouge qu'en y. */
+  if (seuil.saisissable) {
+    svg += `<rect class="carte-prise" x="${G}" y="${T}" width="${arr(L - G - D)}" height="${arr(sol - T)}"
+      data-x0="0" data-x1="1" data-y0="0" data-y1="${yMax}" />`;
+  }
+
+  return cadre(svg, H, aria) + "</figure>";
+}
+
+/**
  * LES STRATES — une promesse qu'on déplace, et les populations qu'elle sépare.
  *
  * Une moyenne ne décrit personne quand la population en cache plusieurs. Le dire est un
