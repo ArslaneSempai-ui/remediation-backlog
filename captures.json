@@ -1,0 +1,11 @@
+{ "images": [
+  { "sortie": "images/screen.png", "type": "png", "taille": [1100, 2400], "echelle": 2,
+    "depart": 120, "hauteurUtile": 900 },
+  { "sortie": "images/ordre.gif", "type": "gif", "taille": [900, 560], "echelle": 2,
+    "duree": 1300, "fenetre": [1100, 2400], "depart": 380, "hauteurUtile": 690,
+    "scenes": [
+      ["#plan .seq-zone[data-choix=\"F-05\"]!"],
+      ["#plan .seq-zone[data-choix=\"F-03\"]!"],
+      ["#plan .seq-zone[data-choix=\"F-06\"]!"]
+    ] }
+] }

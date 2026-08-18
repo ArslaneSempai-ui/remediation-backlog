@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The order is the plan</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23fbfaf7'/%3E%3Crect x='2' y='3' width='9' height='2' fill='%23141618'/%3E%3Crect x='2' y='7' width='12' height='2' fill='%23141618'/%3E%3Crect x='2' y='11' width='6' height='2' fill='%23141618'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="registre.css" />
+</head>
+<body>
+<main>
+<p class="renvoi" style="margin-bottom:1.5rem">
+This runs entirely in your browser — no server, nothing uploaded. <b>Take a row</b> to move
+that finding to the front and watch which deadlines fall. The findings, the estimates and
+the deadlines are a plausible inspection, not a real one.
+<a href="https://github.com/ArslaneSempai-ui/remediation-backlog">Source and method</a>.
+</p>
+  <div class="haut">
+    <div><h1 id="h1"></h1><p class="lede" id="lede"></p></div>
+  </div>
+
+  <div class="chiffres" id="releve"></div>
+  <div id="verdict"></div>
+
+  <h2 id="titrePlan"></h2>
+  <div id="plan"></div>
+
+  <h2 id="titreOrdres"></h2>
+  <div id="ordres"></div>
+
+  <h2 id="titreEquipe"></h2>
+  <div id="equipe"></div>
+
+  <p class="renvoi" id="provenanceLegende"></p>
+</main>
+
+<script>window.LOCAL_PRET = new Promise((r) => { window.LOCAL_POSE = r; });</script>
+<script type="module">
+import { CARNET, EQUIPE, INVENTAIRE, POLITIQUES, capaciteParJour, planifier } from "./js/carnet.js";
+
+const BORNES = { personnes: [1, 20], joursParMoisEtParPersonne: [4, 21] };
+
+let ordre = POLITIQUES.graviteDabord(CARNET);
+let equipe = { ...EQUIPE };
+
+const etat = () => ({
+  carnet: CARNET,
+  inventaire: INVENTAIRE,
+  ordre,
+  equipe,
+  bornes: BORNES,
+  capacite: capaciteParJour(equipe),
+  centre: planifier(ordre, CARNET, equipe, "centre"),
+  haut: planifier(ordre, CARNET, equipe, "haut"),
+  politiques: Object.keys(POLITIQUES).map((nom) => {
+    const o = POLITIQUES[nom](CARNET);
+    return { nom, ordre: o,
+      centre: planifier(o, CARNET, equipe, "centre"),
+      haut: planifier(o, CARNET, equipe, "haut") };
+  }),
+});
+
+window.LOCAL = async (chemin, corps) => {
+  if (chemin === "/api/etat") return etat();
+  if (chemin === "/api/ensuite") {
+    const ref = String(corps.ref || "");
+    if (ordre.includes(ref)) ordre = [ref, ...ordre.filter((r) => r !== ref)];
+    return etat();
+  }
+  if (chemin === "/api/politique") {
+    const nom = String(corps.nom || "");
+    if (POLITIQUES[nom]) ordre = POLITIQUES[nom](CARNET);
+    return etat();
+  }
+  if (chemin === "/api/equipe") {
+    for (const [cle, bornes] of Object.entries(BORNES)) {
+      const v = Number(corps[cle]);
+      if (Number.isFinite(v)) equipe = { ...equipe, [cle]: Math.min(bornes[1], Math.max(bornes[0], v)) };
+    }
+    return etat();
+  }
+  return {};
+};
+
+window.LOCAL_POSE && window.LOCAL_POSE();
+</script>
+<script type="module">
+import { sequence, barres, choisir, brancher } from "./graphes.js";
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+/* La balise classique crée la promesse avant tout module ; sans elle, l'écran peut partir
+ * avant le shim et lire la page 404 de l'hôte comme du JSON. */
+const pret = async () => { if (!window.LOCAL && window.LOCAL_PRET) await window.LOCAL_PRET; };
+
+const api = async (chemin, corps) => {
+  await pret();
+  if (window.LOCAL) return window.LOCAL(chemin, corps);
+  const r = await fetch(chemin, corps
+    ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(corps) }
+    : {});
+  return r.json();
+};
+
+const T = {
+  h1: "Eight findings, one team, and the order decides",
+  lede: "A remediation plan is a list with a deadline on each line. The same work in a different order misses different deadlines — and the plan the committee sees is the one built on the central estimate.",
+
+  releve: "Your order, planned",
+  manques: "deadlines missed, central estimate",
+  manquesHaut: "missed on the high estimate",
+  cout: "cost of the delay, high estimate",
+  fin: "working days to clear the book",
+
+  reflexe: (d) => `<b>This is the reflex: worst first.</b> It misses ${d} on the central estimate — the plan that gets presented — and the same work sorted by deadline misses none.`,
+  propre: "<b>Nothing misses on the central estimate.</b> That is the plan the committee sees; the bars behind it are the same order on the high estimate.",
+  tombeAuHaut: (n, d) => ` On the high estimate it still misses <b>${n}</b>, for <b>${d}</b>.`,
+
+  titrePlan: "The plan, and the plan nobody shows",
+  planQuoi: "Each bar is a finding, worked one at a time by the same team. The vertical line is its deadline; the hatched part is what runs past it. The pale bar behind is the identical order on the high estimate.",
+  figPlanTitre: (j) => `The book cleared in ${j} working days, in this order`,
+  figPlanAria: "One horizontal bar per finding, laid end to end in the chosen order. A vertical line marks each deadline, the part running past it is hatched, and a paler bar behind each shows the same order on the high estimate.",
+  motEcheance: "deadline", motHaut: "same order, high estimate",
+  prendre: "Take this one next — the row moves to the front",
+  jours: (v) => `${Math.round(v)} d`,
+
+  titreOrdres: "The four orders a room actually proposes",
+  ordresQuoi: "Each of these is defensible out loud, and they do not cost the same. Take one, then move rows to beat it.",
+  figOrdresAria: "Four bars of the cost of delay for each ordering policy, on the high estimate; the cheapest is emphasised.",
+  figOrdresTitre: "Cost of the delay, high estimate",
+  noms: {
+    graviteDabord: "Worst first", echeanceDabord: "Earliest deadline first",
+    plusCourtDabord: "Shortest first", margeDabord: "Least slack first",
+  },
+  sousOrdre: (m, mh) => `${m} missed central · ${mh} high`,
+  ordresSuite: (pire, cher, meilleur, pasCher) =>
+    `<b>${pire}</b> — the reflex — costs <b>${cher}</b> on the high estimate. <b>${meilleur}</b> costs <b>${pasCher}</b> for exactly the same work. And counting red lines is not counting money: an order can miss more deadlines and cost less, which is what a status spreadsheet cannot show.`,
+
+  titreEquipe: "The team",
+  equipeQuoi: "Nothing above changes the work; this does. Sixteen usable days a month out of about twenty-one working ones — the rest goes to meetings, leave and incidents.",
+  personnes: "People on remediation",
+  joursParMoisEtParPersonne: "Usable days per person per month",
+  capacite: (c) => `That is <b>${c}</b> person-days of progress per working day.`,
+
+  provenance: "Every figure here is <b>assumed</b> or <b>chosen</b>: the findings, the estimates and the deadlines are a plausible inspection, not a real one, and the cost of a month late is an order of magnitude. What the tool demonstrates is not the amount — it is that the order changes it, at identical work.",
+};
+const t = () => T;
+
+let etat = null, occupe = false, enAttente = null;
+
+const nb = (n) => Math.round(n).toLocaleString("en-GB");
+const dollars = (n) => "$" + nb(n);
+const lire = (v) => Number(String(v).replace(/\s/g, "").replace(",", "."));
+
+function blocReleve() {
+  const L = t(), c = etat.centre, h = etat.haut;
+  const ligne = (k, v) => `<div class="ligne"><span class="intitule">${esc(k)}</span><span class="valeur">${v}</span></div>`;
+  $("#releve").innerHTML = `<section class="feuillet">
+    <div class="titre">${esc(L.releve)}</div>
+    ${ligne(L.fin, nb(c.fin))}
+    ${ligne(L.manquesHaut, String(h.manques) + " / " + etat.carnet.length)}
+    ${ligne(L.cout, dollars(h.cout))}
+    <div class="ligne total"><span class="intitule">${esc(L.manques)}</span>
+      <span class="valeur">${c.manques} / ${etat.carnet.length}</span></div>
+  </section>`;
+}
+
+function blocVerdict() {
+  const L = t(), c = etat.centre, h = etat.haut;
+  const suite = h.manques > 0 ? L.tombeAuHaut(h.manques, dollars(h.cout)) : "";
+  $("#verdict").innerHTML = c.manques > 0
+    ? `<div class="renvoi defavorable">${L.reflexe(c.manques + " of " + etat.carnet.length)}${suite}</div>`
+    : `<div class="renvoi ${h.manques ? "attention" : "favorable"}">${L.propre}${suite}</div>`;
+}
+
+function blocPlan() {
+  const L = t();
+  $("#titrePlan").textContent = L.titrePlan;
+
+  /*
+   * La figure est la commande.
+   *
+   * On ne demande pas au lecteur de réordonner une liste : on lui demande ce qu'une salle
+   * se demande vraiment — « on prend lequel ensuite ? ». Prendre une ligne la remonte en
+   * tête, et le calendrier se refait sous la main.
+   */
+  const parRef = new Map(etat.haut.lignes.map((l) => [l.constat.ref, l]));
+  const lignes = etat.centre.lignes.map((l) => ({
+    cle: l.constat.ref,
+    nom: l.constat.ref,
+    debut: l.debut, fin: l.fin,
+    finHaute: parRef.get(l.constat.ref)?.fin,
+    echeance: l.constat.echeance,
+    retard: l.retard,
+  }));
+
+  const fig = sequence({
+    lignes,
+    fmtX: L.jours,
+    motEcheance: L.motEcheance,
+    motHaut: L.motHaut,
+    choix: true,
+    aria: L.figPlanAria,
+  });
+
+  const table = etat.centre.lignes.map((l) => `<tr${l.retard > 0 ? ' class="ici"' : ""}>
+    <td><span class="reference">${esc(l.constat.ref)}</span></td>
+    <td>${esc(l.constat.quoi)}</td>
+    <td>${nb(l.constat.charge.centre)} – ${nb(l.constat.charge.haut)}</td>
+    <td>${nb(l.constat.echeance)}</td>
+    <td>${l.retard > 0 ? L.jours(l.retard) : "—"}</td>
+    <td>${l.constat.engageDevantLeRegulateur ? "committed" : "internal"}</td></tr>`).join("");
+
+  $("#plan").innerHTML = `<section class="feuillet"><div class="corps">
+    <div class="quoi">${esc(L.planQuoi)}</div>
+    <div class="titre-fig">${esc(L.figPlanTitre(nb(etat.centre.fin)))}</div>${fig}
+    <div class="suite">${esc(L.prendre)}</div>
+    <details><summary>Show every finding</summary>
+      <div class="defile"><table><thead><tr>
+        <th></th><th>What it is</th><th>Person-days</th><th>Deadline (d)</th><th>Late by</th><th>Deadline set by</th>
+      </tr></thead><tbody>${table}</tbody></table></div>
+    </details>
+  </div></section>`;
+
+  brancher($("#plan"));
+  choisir($("#plan"), (ref) => envoyer("/api/ensuite", { ref }), null);
+}
+
+function blocOrdres() {
+  const L = t();
+  $("#titreOrdres").textContent = L.titreOrdres;
+  const p = etat.politiques;
+  const cher = [...p].sort((a, b) => b.haut.cout - a.haut.cout)[0];
+  const pasCher = [...p].sort((a, b) => a.haut.cout - b.haut.cout)[0];
+
+  const fig = barres({
+    items: p.map((x) => ({
+      nom: L.noms[x.nom] ?? x.nom,
+      valeur: x.haut.cout,
+      ton: x === pasCher ? "accent" : x === cher ? "defavorable" : "neutre",
+      note: L.sousOrdre(x.centre.manques, x.haut.manques),
+    })),
+    fmt: dollars,
+    aria: L.figOrdresAria,
+  });
+
+  const boutons = p.map((x) => `<button type="button" class="b" data-ordre="${esc(x.nom)}">${esc(L.noms[x.nom] ?? x.nom)}</button>`).join(" ");
+
+  $("#ordres").innerHTML = `<div class="feuillet">
+    <div class="quoi">${esc(L.ordresQuoi)}</div>
+    <div class="titre-fig">${esc(L.figOrdresTitre)}</div>${fig}
+    <div class="suite">${L.ordresSuite(
+      esc(L.noms[cher.nom] ?? cher.nom), dollars(cher.haut.cout),
+      esc(L.noms[pasCher.nom] ?? pasCher.nom), dollars(pasCher.haut.cout))}</div>
+    <div class="rang" style="margin-top:14px;flex-wrap:wrap;gap:8px">${boutons}</div>
+  </div>`;
+
+  brancher($("#ordres"));
+  for (const b of document.querySelectorAll("#ordres [data-ordre]")) {
+    b.onclick = () => envoyer("/api/politique", { nom: b.dataset.ordre });
+  }
+}
+
+function blocEquipe() {
+  const L = t();
+  $("#titreEquipe").textContent = L.titreEquipe;
+  const champs = Object.keys(etat.bornes).map((cle) => {
+    const [min, max] = etat.bornes[cle];
+    return `<div><label for="${cle}">${esc(L[cle] ?? cle)}</label>
+      <input type="text" inputmode="numeric" id="${cle}" value="${etat.equipe[cle]}"
+        data-min="${min}" data-max="${max}" /></div>`;
+  }).join("");
+
+  $("#equipe").innerHTML = `<div class="feuillet">
+    <div class="quoi">${esc(L.equipeQuoi)}</div>
+    <div class="grille">${champs}</div>
+    <div class="renvoi">${L.capacite(etat.capacite.toFixed(2))}</div>
+  </div>`;
+
+  for (const cle of Object.keys(etat.bornes)) {
+    $(`#${cle}`).onchange = (e) => envoyer("/api/equipe", { [cle]: lire(e.target.value) });
+  }
+}
+
+function dessiner() {
+  const L = t();
+  $("#h1").textContent = L.h1;
+  $("#lede").textContent = L.lede;
+  $("#provenanceLegende").innerHTML = L.provenance;
+  blocReleve(); blocVerdict(); blocPlan(); blocOrdres(); blocEquipe();
+}
+
+/* Un envoi à la fois, et le dernier demandé n'est pas jeté. */
+async function envoyer(chemin, corps) {
+  if (occupe) { enAttente = [chemin, corps]; return; }
+  occupe = true;
+  try { etat = await api(chemin, corps ?? {}); dessiner(); }
+  finally {
+    occupe = false;
+    if (enAttente) { const suite = enAttente; enAttente = null; envoyer(...suite); }
+  }
+}
+
+etat = await api("/api/etat");
+dessiner();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "remediation-backlog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A remediation plan clears every deadline on the central estimate and misses four on the pessimistic one. Nobody plans on the pessimistic one.",
+  "scripts": {
+    "start": "node src/server.ts",
+    "plan": "node src/carnet.ts",
+    "test": "tsc --noEmit && node --test src/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "pages": "tsc -p tsconfig.web.json && node src/pages.ts && node src/verifier-ecran.mjs . 2",
+    "captures": "node src/capturer.mjs ."
+  },
+  "engines": { "node": ">=24" },
+  "devDependencies": { "typescript": "^5.9.0", "@types/node": "^24.0.0" }
+}
