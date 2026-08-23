@@ -7,11 +7,17 @@
   "scripts": {
     "start": "node src/server.ts",
     "plan": "node src/carnet.ts",
-    "test": "tsc --noEmit && node --test src/*.test.*",
+    "test": "tsc --noEmit && node src/figures-readme.ts --check && node --test src/*.test.*",
     "typecheck": "tsc --noEmit",
     "pages": "tsc -p tsconfig.web.json && node src/pages.ts && node src/verifier-ecran.mjs . 2",
-    "captures": "node src/capturer.mjs ."
+    "captures": "node src/capturer.mjs .",
+    "figures": "node src/figures-readme.ts"
   },
-  "engines": { "node": ">=24" },
-  "devDependencies": { "typescript": "^5.9.0", "@types/node": "^24.0.0" }
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^24.0.0"
+  }
 }

@@ -45,9 +45,9 @@ plans on it. So the plan clears every deadline, and then it does not.
 | Least slack first | 0 | $0 | 6 | $645,000 |
 <!-- /figures:ordres -->
 
-Read the last two rows together. **Least slack first misses twice as many deadlines as
-shortest first and costs a third of the money.** Counting red lines and counting money do
-not rank the same, and a tracker that counts red lines will recommend the expensive one.
+<!-- figures:lecture -->
+Read the last two rows together. **Least slack first misses 6 deadlines against 3, and costs $645,000 against $1,580,000 — 40.8 % of the money.** Counting red lines and counting money do not rank the same, and a tracker that counts red lines will recommend the expensive one.
+<!-- /figures:lecture -->
 
 ## What is measured here, and what is not
 
@@ -61,16 +61,17 @@ whatever numbers you put in — which is why the team size and the ordering are 
 on the screen.
 
 <!-- figures:provenance -->
-| | Input | What it is | Why it is that kind |
+**3 assumed**, **1 chosen**. What each kind means, and what you are entitled to ask of it:
+
+- **assumed** — an input nobody here can know; yours to supply. *put your own figure in, and read the band around it.*
+- **chosen** — my judgement and nothing else. *check whether the sweep says it decides anything.*
+
+| Kind | Name | What it is | Note |
 |---|---|---|---|
 | assumed | `charge` | person-days per finding, low / central / high | an estimate given as three numbers, because that is what an estimate is |
 | assumed | `echeance` | working days until the finding must be closed | the ones committed to the regulator are marked; the others are internal |
 | assumed | `equipe` | people on remediation and usable days a month | sixteen usable days out of about twenty-one working ones |
 | chosen | `coutParMoisDeRetard` | cost of one month late, per finding | fines, remediation and enhanced supervision, as an order of magnitude |
-
-**measured** — run and recorded here  
-**assumed** — a figure a reader substitutes their own for  
-**chosen** — a figure I picked, and the verdict moves with it
 <!-- /figures:provenance -->
 
 ## The test that changed the finding
