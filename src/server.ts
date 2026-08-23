@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { CARNET, EQUIPE, INVENTAIRE, POLITIQUES, capaciteParJour, planifier,
          type Equipe, type NomPolitique } from "./carnet.ts";
 import { isMain } from "./cli.ts";
+import { fileURLToPath } from "node:url";
 
 const PORT = Number(process.env.PORT ?? 4680);
 
@@ -74,13 +75,13 @@ const serveur = createServer(async (req, res) => {
   try {
     if (url.pathname === "/") {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
-      res.end(readFileSync(new URL("./ui.html", import.meta.url).pathname, "utf8"));
+      res.end(readFileSync(fileURLToPath(new URL("./ui.html", import.meta.url)), "utf8"));
       return;
     }
     for (const [chemin, type] of [["/graphes.js", "text/javascript"], ["/registre.css", "text/css"]] as const) {
       if (url.pathname === chemin) {
         res.writeHead(200, { "content-type": `${type}; charset=utf-8`, "cache-control": "no-store" });
-        res.end(readFileSync(new URL("." + chemin, import.meta.url).pathname, "utf8"));
+        res.end(readFileSync(fileURLToPath(new URL("." + chemin, import.meta.url)), "utf8"));
         return;
       }
     }

@@ -19,6 +19,7 @@
  * voit jamais que la première. Chaque constat porte donc `bas`, `centre`, `haut`, et le
  * calendrier se lit deux fois.
  */
+import { isMain } from "./cli.js";
 /**
  * Le cas de référence.
  *
@@ -123,3 +124,38 @@ export const INVENTAIRE = [
     { provenance: "assumed", name: "equipe", what: "people on remediation and usable days a month",
         note: "sixteen usable days out of about twenty-one working ones" },
 ];
+/**
+ * WHAT `npm run plan` PRINTS, AND WHY IT PRINTED NOTHING.
+ *
+ * `package.json` published `plan` as `node src/carnet.ts`, and this module had no
+ * command-line half at all: no `isMain`, no `console.log`. The command therefore exited 0
+ * after writing zero bytes — measured, not inferred. **A published command that succeeds
+ * silently is worse than one that is missing**, because the exit code says it worked and
+ * the buyer has nothing to be suspicious of. A missing command at least fails loudly.
+ *
+ * It prints both readings side by side because the central one alone is the lie this file
+ * was written against: at the central estimate three of the four orderings cost nothing and
+ * miss nothing, and the ordering only starts to matter when the estimates come in high.
+ * Printing the central column on its own would reproduce, in the tool, the flaw the tool
+ * exists to expose.
+ */
+if (isMain(import.meta)) {
+    const money = (n) => "$" + n.toLocaleString("en-US");
+    const noms = Object.keys(POLITIQUES);
+    console.log(`\n  ${CARNET.length} findings, ${EQUIPE.personnes} people, `
+        + `${EQUIPE.joursParMoisEtParPersonne} usable days each per month `
+        + `(${capaciteParJour(EQUIPE).toFixed(2)} person-days per working day).\n`);
+    console.log("  order                     central: missed  cost        high: missed  cost");
+    for (const nom of noms) {
+        const ordre = POLITIQUES[nom](CARNET);
+        const c = planifier(ordre, CARNET, EQUIPE, "centre");
+        const h = planifier(ordre, CARNET, EQUIPE, "haut");
+        console.log(`  ${nom.padEnd(24)} ${String(c.manques).padStart(13)}  ${money(c.cout).padEnd(11)}`
+            + ` ${String(h.manques).padStart(11)}  ${money(h.cout)}`);
+    }
+    /* The commitments made in front of the regulator are the ones that are not just money. */
+    const engages = CARNET.filter((c) => c.engageDevantLeRegulateur).length;
+    console.log(`\n  ${engages} of the ${CARNET.length} deadlines were committed in front of the `
+        + `regulator; missing one of those is not priced here.`);
+    console.log("  The ordering is yours to choose. This tool only prices the choice.\n");
+}
