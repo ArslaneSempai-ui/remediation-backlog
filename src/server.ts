@@ -111,11 +111,24 @@ const serveur = createServer(async (req, res) => {
 
     if (url.pathname === "/api/equipe" && req.method === "POST") {
       const recu = await corps(req);
+      const refuses: string[] = [];
       for (const [cle, [bas, haut]] of Object.entries(BORNES)) {
-        const v = Number(recu[cle]);
-        if (Number.isFinite(v)) (equipe as any)[cle] = Math.min(haut, Math.max(bas, v));
+        /* LA CONVERSION PRÉCÉDAIT LA GARDE, ET LA GARDE NE GARDAIT RIEN.
+           `Number("")` vaut 0, `Number(null)` vaut 0 : tous deux FINIS, donc acceptés,
+           puis ramenés par le clamp sur la borne basse. Un champ vide se posait ainsi au
+           bout du domaine avec un 200, et la valeur affichée n'était plus celle qu'on
+           croyait lire. Le clamp n'était pas la parade : il était le masque.
+           On refuse maintenant ce qui n'est pas un nombre, et on le DIT — un refus muet
+           est le même défaut, remonté d'un étage. */
+        if (!(cle in recu)) continue;
+        const v = (recu as Record<string, unknown>)[cle];
+        if (typeof v === "number" && Number.isFinite(v)) {
+          (equipe as any)[cle] = Math.min(haut, Math.max(bas, v));
+        } else {
+          refuses.push(`${cle}=${JSON.stringify(v)}`);
+        }
       }
-      return json(res, etat());
+      return json(res, { ...etat(), refuses });
     }
 
     res.writeHead(404).end("introuvable");
