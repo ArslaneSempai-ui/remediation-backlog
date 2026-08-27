@@ -13,7 +13,7 @@ only the order changes.
 take a row to move that finding to the front and watch which deadlines fall. Nothing is
 uploaded.
 
-![Taking three rows: three missed deadlines become none, and the cost falls by $860,000](images/ordre.gif)
+![Taking three rows: three missed deadlines become none, and the cost falls by $695,000](images/ordre.gif)
 
 ```bash
 npm start   # the screen, on localhost:4680
