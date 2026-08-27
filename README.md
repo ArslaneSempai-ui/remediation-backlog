@@ -17,7 +17,7 @@ uploaded.
 
 ```bash
 npm start   # the screen, on localhost:4680
-npm test    # types and <!--p:portfolio.parDepot.remediation-->31<!--/p--> tests
+npm test    # types and <!--p:portfolio.parDepot.remediation-->54<!--/p--> tests
 ```
 
 Node with native TypeScript, no build step, no runtime dependencies.
