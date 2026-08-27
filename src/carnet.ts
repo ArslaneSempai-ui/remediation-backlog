@@ -89,6 +89,23 @@ export const CARNET: Constat[] = [
     engageDevantLeRegulateur: false },
 ];
 
+/**
+ * Les bornes dans lesquelles une taille d'équipe est recevable.
+ *
+ * ─── POURQUOI ELLES VIVENT ICI ET NULLE PART AILLEURS ───
+ *
+ * Elles existaient en DEUX exemplaires : dans le serveur et dans la page engendrée. Elles
+ * portaient les mêmes nombres, et c'est exactement ce qui rendait la divergence future
+ * silencieuse — la prochaine modification d'un seul des deux aurait fait borner le navigateur
+ * et le serveur différemment, sur la valeur qui décide de tout le calendrier.
+ *
+ * Le domaine est le seul endroit qui puisse les porter : les deux façades l'importent déjà.
+ */
+export const BORNES = {
+  personnes: [1, 20],
+  joursParMoisEtParPersonne: [4, 21],
+} as const;
+
 export const EQUIPE: Equipe = { personnes: 3, joursParMoisEtParPersonne: 16 };
 
 /** Jours ouvrés que l'équipe produit par jour de calendrier ouvré. */

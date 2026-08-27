@@ -8,7 +8,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
-import { CARNET, EQUIPE, INVENTAIRE, POLITIQUES, capaciteParJour, planifier,
+import { BORNES, CARNET, EQUIPE, INVENTAIRE, POLITIQUES, capaciteParJour, planifier,
          type Equipe, type NomPolitique } from "./carnet.ts";
 import { isMain } from "./cli.ts";
 import { fileURLToPath } from "node:url";
@@ -24,10 +24,10 @@ const PORT = Number(process.env.PORT ?? 4680);
 let ordre: string[] = POLITIQUES.graviteDabord(CARNET);
 let equipe: Equipe = { ...EQUIPE };
 
-export const BORNES = {
-  personnes: [1, 20],
-  joursParMoisEtParPersonne: [4, 21],
-} as const;
+/* Réexporté depuis le domaine : deux définitions des mêmes bornes divergent au premier
+   changement, et elles portaient déjà les mêmes nombres — l'accord d'aujourd'hui est ce qui
+   rend l'écart de demain invisible. */
+export { BORNES };
 
 function json(res: ServerResponse, corps: unknown, code = 200): void {
   const load = JSON.stringify(corps);

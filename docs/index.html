@@ -36,9 +36,8 @@ the deadlines are a plausible inspection, not a real one.
 
 <script>window.LOCAL_PRET = new Promise((r) => { window.LOCAL_POSE = r; });</script>
 <script type="module">
-import { CARNET, EQUIPE, INVENTAIRE, POLITIQUES, capaciteParJour, planifier } from "./js/carnet.js";
+import { BORNES, CARNET, EQUIPE, INVENTAIRE, POLITIQUES, capaciteParJour, planifier } from "./js/carnet.js";
 
-const BORNES = { personnes: [1, 20], joursParMoisEtParPersonne: [4, 21] };
 
 let ordre = POLITIQUES.graviteDabord(CARNET);
 let equipe = { ...EQUIPE };
@@ -73,11 +72,24 @@ window.LOCAL = async (chemin, corps) => {
     return etat();
   }
   if (chemin === "/api/equipe") {
+    /* LA CONVERSION PRECEDAIT LA GARDE, ET LA GARDE NE GARDAIT RIEN.
+       Number("") vaut 0 : un champ vide etait FINI, donc accepte, puis ramene par le clamp
+       sur la borne basse. Le clamp n etait pas la parade, il etait le masque — la valeur
+       affichee n etait plus celle qu on croyait lire, et tout le calendrier suivait.
+       Le serveur portait deja cette correction ; cette copie-ci ne l avait pas. On refuse ce
+       qui n est pas un nombre, et on le DIT : un refus muet est le meme defaut d un etage
+       plus haut. */
+    const refuses = [];
     for (const [cle, bornes] of Object.entries(BORNES)) {
-      const v = Number(corps[cle]);
-      if (Number.isFinite(v)) equipe = { ...equipe, [cle]: Math.min(bornes[1], Math.max(bornes[0], v)) };
+      if (!(cle in corps)) continue;
+      const v = corps[cle];
+      if (typeof v === "number" && Number.isFinite(v)) {
+        equipe = { ...equipe, [cle]: Math.min(bornes[1], Math.max(bornes[0], v)) };
+      } else {
+        refuses.push(cle + "=" + JSON.stringify(v));
+      }
     }
-    return etat();
+    return { ...etat(), refuses };
   }
   return {};
 };
