@@ -63,8 +63,8 @@ on the screen.
 <!-- figures:provenance -->
 **3 assumed**, **1 chosen**. What each kind means, and what you are entitled to ask of it:
 
-- **assumed** — an input nobody here can know; yours to supply. *put your own figure in, and read the band around it.*
-- **chosen** — my judgement and nothing else. *check whether the sweep says it decides anything.*
+- **assumed**: an input nobody here can know; yours to supply. *put your own figure in, and read the band around it.*
+- **chosen**: my judgement and nothing else. *check whether the sweep says it decides anything.*
 
 | Kind | Name | What it is | Note |
 |---|---|---|---|
