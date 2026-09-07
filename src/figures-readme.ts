@@ -87,7 +87,7 @@ const part = (marge.haut.cout / court.haut.cout) * 100;
 const lecture =
   `Read the last two rows together. **${LABELS.margeDabord} misses ${marge.haut.manques} ` +
   `deadlines against ${court.haut.manques}, and costs ${money(marge.haut.cout)} against ` +
-  `${money(court.haut.cout)} — ${part.toFixed(1)} % of the money.** Counting red lines and ` +
+  `${money(court.haut.cout)}: ${part.toFixed(1)} % of the money.** Counting red lines and ` +
   `counting money do not rank the same, and a tracker that counts red lines will recommend ` +
   `the expensive one.`;
 

@@ -3,13 +3,13 @@
 Eight remediation findings, one team, a deadline on each line. The plan that gets presented
 is built on the central estimate. This one is built twice.
 
-**The finding.** Taking the worst finding first — the reflex in every room — misses **3 of
+**The finding.** Taking the worst finding first (the reflex in every room) misses **3 of
 8 deadlines** on the central estimate and costs **$695,000**. The identical work sorted by
 deadline misses **none**. On the high estimate, which nobody plans on, the reflex misses 5
 and costs **$1,825,000** against **$450,000**. Same findings, same team, same total effort:
 only the order changes.
 
-**[Try it in your browser →](https://arslanesempai-ui.github.io/remediation-backlog/)** —
+**[Try it in your browser →](https://arslanesempai-ui.github.io/remediation-backlog/)**.
 take a row to move that finding to the front and watch which deadlines fall. Nothing is
 uploaded.
 
@@ -31,7 +31,7 @@ everything except the two facts that decide the outcome.
 
 **The first is that the team is one team.** Three people on eight workstreams do not run
 eight workstreams; they run one at a time, more slowly. The moment that is true, the order
-is a decision — and it is the only decision anyone in the room actually controls.
+is a decision, and it is the only decision anyone in the room actually controls.
 
 **The second is that an estimate is a range.** Everyone knows it while giving it and nobody
 plans on it. So the plan clears every deadline, and then it does not.
@@ -46,7 +46,7 @@ plans on it. So the plan clears every deadline, and then it does not.
 <!-- /figures:ordres -->
 
 <!-- figures:lecture -->
-Read the last two rows together. **Least slack first misses 6 deadlines against 3, and costs $645,000 against $1,580,000 — 40.8 % of the money.** Counting red lines and counting money do not rank the same, and a tracker that counts red lines will recommend the expensive one.
+Read the last two rows together. **Least slack first misses 6 deadlines against 3, and costs $645,000 against $1,580,000: 40.8 % of the money.** Counting red lines and counting money do not rank the same, and a tracker that counts red lines will recommend the expensive one.
 <!-- /figures:lecture -->
 
 ## What is measured here, and what is not
@@ -57,7 +57,7 @@ an order of magnitude, not a quote.
 
 That is deliberate and it is the point. The claim is not "your remediation will cost
 $695,000". The claim is **the order changes the answer at identical work**, and that holds
-whatever numbers you put in — which is why the team size and the ordering are yours to move
+whatever numbers you put in, which is why the team size and the ordering are yours to move
 on the screen.
 
 <!-- figures:provenance -->

@@ -10,7 +10,7 @@
 <body>
 <main>
 <p class="renvoi" style="margin-bottom:1.5rem">
-This runs entirely in your browser — no server, nothing uploaded. <b>Take a row</b> to move
+This runs entirely in your browser: no server, nothing uploaded. <b>Take a row</b> to move
 that finding to the front and watch which deadlines fall. The findings, the estimates and
 the deadlines are a plausible inspection, not a real one.
 <a href="https://github.com/ArslaneSempai-ui/remediation-backlog">Source and method</a>.
@@ -116,7 +116,7 @@ const api = async (chemin, corps) => {
 
 const T = {
   h1: "Eight findings, one team, and the order decides",
-  lede: "A remediation plan is a list with a deadline on each line. The same work in a different order misses different deadlines — and the plan the committee sees is the one built on the central estimate.",
+  lede: "A remediation plan is a list with a deadline on each line. The same work in a different order misses different deadlines, and the plan the committee sees is the one built on the central estimate.",
 
   releve: "Your order, planned",
   manques: "deadlines missed, central estimate",
@@ -124,7 +124,7 @@ const T = {
   cout: "cost of the delay, high estimate",
   fin: "working days to clear the book",
 
-  reflexe: (d) => `<b>This is the reflex: worst first.</b> It misses ${d} on the central estimate — the plan that gets presented — and the same work sorted by deadline misses none.`,
+  reflexe: (d) => `<b>This is the reflex: worst first.</b> It misses ${d} on the central estimate (the plan that gets presented) and the same work sorted by deadline misses none.`,
   propre: "<b>Nothing misses on the central estimate.</b> That is the plan the committee sees; the bars behind it are the same order on the high estimate.",
   tombeAuHaut: (n, d) => ` On the high estimate it still misses <b>${n}</b>, for <b>${d}</b>.`,
 
@@ -133,7 +133,7 @@ const T = {
   figPlanTitre: (j) => `The book cleared in ${j} working days, in this order`,
   figPlanAria: "One horizontal bar per finding, laid end to end in the chosen order. A vertical line marks each deadline, the part running past it is hatched, and a paler bar behind each shows the same order on the high estimate.",
   motEcheance: "deadline", motHaut: "same order, high estimate",
-  prendre: "Take this one next — the row moves to the front",
+  prendre: "Take this one next: the row moves to the front",
   jours: (v) => `${Math.round(v)} d`,
 
   titreOrdres: "The four orders a room actually proposes",
@@ -146,15 +146,15 @@ const T = {
   },
   sousOrdre: (m, mh) => `${m} missed central · ${mh} high`,
   ordresSuite: (pire, cher, meilleur, pasCher) =>
-    `<b>${pire}</b> — the reflex — costs <b>${cher}</b> on the high estimate. <b>${meilleur}</b> costs <b>${pasCher}</b> for exactly the same work. And counting red lines is not counting money: an order can miss more deadlines and cost less, which is what a status spreadsheet cannot show.`,
+    `<b>${pire}</b> (the reflex) costs <b>${cher}</b> on the high estimate. <b>${meilleur}</b> costs <b>${pasCher}</b> for exactly the same work. And counting red lines is not counting money: an order can miss more deadlines and cost less, which is what a status spreadsheet cannot show.`,
 
   titreEquipe: "The team",
-  equipeQuoi: "Nothing above changes the work; this does. Sixteen usable days a month out of about twenty-one working ones — the rest goes to meetings, leave and incidents.",
+  equipeQuoi: "Nothing above changes the work; this does. Sixteen usable days a month out of about twenty-one working ones. The rest goes to meetings, leave and incidents.",
   personnes: "People on remediation",
   joursParMoisEtParPersonne: "Usable days per person per month",
   capacite: (c) => `That is <b>${c}</b> person-days of progress per working day.`,
 
-  provenance: "Every figure here is <b>assumed</b> or <b>chosen</b>: the findings, the estimates and the deadlines are a plausible inspection, not a real one, and the cost of a month late is an order of magnitude. What the tool demonstrates is not the amount — it is that the order changes it, at identical work.",
+  provenance: "Every figure here is <b>assumed</b> or <b>chosen</b>: the findings, the estimates and the deadlines are a plausible inspection, not a real one, and the cost of a month late is an order of magnitude. What the tool demonstrates is not the amount; it is that the order changes it, at identical work.",
 };
 const t = () => T;
 
@@ -220,7 +220,7 @@ function blocPlan() {
     <td>${esc(l.constat.quoi)}</td>
     <td>${nb(l.constat.charge.centre)} – ${nb(l.constat.charge.haut)}</td>
     <td>${nb(l.constat.echeance)}</td>
-    <td>${l.retard > 0 ? L.jours(l.retard) : "—"}</td>
+    <td>${l.retard > 0 ? L.jours(l.retard) : "n/a"}</td>
     <td>${l.constat.engageDevantLeRegulateur ? "committed" : "internal"}</td></tr>`).join("");
 
   $("#plan").innerHTML = `<section class="feuillet"><div class="corps">

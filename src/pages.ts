@@ -78,7 +78,7 @@ window.LOCAL_POSE && window.LOCAL_POSE();
 ` + "</" + "script>\n";
 
 const BANNIERE = `<p class="renvoi" style="margin-bottom:1.5rem">
-This runs entirely in your browser — no server, nothing uploaded. <b>Take a row</b> to move
+This runs entirely in your browser: no server, nothing uploaded. <b>Take a row</b> to move
 that finding to the front and watch which deadlines fall. The findings, the estimates and
 the deadlines are a plausible inspection, not a real one.
 <a href="https://github.com/ArslaneSempai-ui/remediation-backlog">Source and method</a>.
